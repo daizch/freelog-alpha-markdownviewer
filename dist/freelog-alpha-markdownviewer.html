@@ -1,4 +1,4 @@
-<template><link rel="stylesheet" href="//static.freelog.com/web-components/static/css/reset.css"><style>.wrapper{width:100%;height:100%;padding:15px 0 15px 15px;background:#fafafa}.selected{font-weight:600}.selected span{color:#3c3}.md-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;line-height:22px}.md-titles{width:300px;position:fixed;top:0;left:0;bottom:0;overflow:auto;background:#fafafa;z-index:1;padding:10px;border-right:1px solid rgba(0,0,0,.07);border-radius:2px}.md-viewer-wrap{margin-left:300px;background:#fff;position:absolute;top:0;left:0;right:0}.md-content-viewer{max-width:800px;padding:20px 0 40px 0;margin:auto}.article-title{border-left:5px solid;margin-bottom:20px;font-size:30px;padding-left:12px;padding-bottom:9px}.article-title time{font-size:16px;color:#aaa;float:right;height:58px;line-height:58px;padding-right:40px}.article-item{border:1px solid #ddd;margin-bottom:65px}.article-content{padding:12px}.error-tip{color:#e6a23c}.action-btn{display:inline-block;line-height:1;white-space:nowrap;border:1px solid #b3d8ff;text-align:center;-webkit-box-sizing:border-box;box-sizing:border-box;outline:0;padding:6px 9px;font-size:14px;border-radius:4px;color:#409eff;background:#ecf5ff;cursor:pointer}</style><div class="wrapper js-wrapper"><div class="md-titles"><ul class="js-md-titles"></ul></div><div class="md-viewer-wrap"><div class="md-content-viewer js-md-viewer"></div></div></div></template><script>/**
+<template><link rel="stylesheet" href="//static.freelog.com/web-components/static/css/reset.css"><style>.wrapper{width:100%;height:100%;padding:15px 0 15px 15px;background:#fafafa}.selected{font-weight:600}.selected span{color:#3c3}.md-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;line-height:22px}.md-titles{width:300px;position:fixed;top:0;left:0;bottom:0;overflow:auto;background:#fafafa;z-index:1;padding:10px;border-right:1px solid rgba(0,0,0,.07);border-radius:2px}.md-viewer-wrap{margin-left:300px;background:#fff;position:absolute;top:0;left:0;right:0}.md-content-viewer{max-width:800px;padding:20px 0 40px 0;margin:auto}.article-title{border-left:5px solid;margin-bottom:20px;font-size:30px;padding-left:12px;padding-bottom:9px}.article-title time{font-size:16px;color:#aaa;float:right;height:58px;line-height:58px;padding-right:40px}.article-item{border:1px solid #ddd;margin-bottom:65px}.article-content{padding:12px;overflow:auto}.error-tip{color:#e6a23c}.action-btn{display:inline-block;line-height:1;white-space:nowrap;border:1px solid #b3d8ff;text-align:center;-webkit-box-sizing:border-box;box-sizing:border-box;outline:0;padding:6px 9px;font-size:14px;border-radius:4px;color:#409eff;background:#ecf5ff;cursor:pointer}</style><div class="wrapper js-wrapper"><div class="md-titles"><ul class="js-md-titles"></ul></div><div class="md-viewer-wrap"><div class="md-content-viewer js-md-viewer"></div></div></div></template><script>/**
  * marked - a markdown parser
  * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
  * https://github.com/chjj/marked
@@ -63,7 +63,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   loadPresentable(presentableId) {
     return window.QI.fetchResource(presentableId + '.data').then(function (res) {
-      var isError = !res.headers.get('freelog-resource-type')
+      var isError = !res.headers.get('freelog-contract-id')
       if (isError) {
         return res.json()
       } else {
@@ -145,8 +145,6 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
       var classList = target.classList
       if (classList.contains('js-to-do')) {
         errorHandler(ev)
-      } else if (classList.contains('js-btn')) {
-        markdownViewHandler(ev)
       } else if (classList.contains('js-md-title')) {
         changeMarkdownView(ev)
       }
@@ -157,22 +155,14 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     function changeMarkdownView(ev) {
       var target = ev.target;
       var index = target.dataset.index;
-      $viewer.innerHTML = self.mdContents[index]
-      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
+      setMarkdownContent(index)
       target.classList.add('selected')
     }
 
-    function markdownViewHandler(ev) {
-      var target = ev.target;
-      var index = target.dataset.index;
-      var $btn = self.getParentByClass(target, 'more-btn')
-      if ($btn.classList.contains('open')) {
-        $btn.classList.remove('open')
-        self.hideMarkdownContent(index)
-      } else {
-        $btn.classList.add('open')
-        self.showMarkdownContent(index)
-      }
+    function setMarkdownContent(index) {
+      index = index || 0
+      $viewer.innerHTML = self.mdContents[index]
+      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
     }
 
     function errorHandler(ev) {
@@ -196,6 +186,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
             }
 
             self.mdContents[index] = html
+            setMarkdownContent(index)
           })
         }
       });

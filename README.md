@@ -14,3 +14,6 @@ npm run dev
 # build for production with minification
 npm run build
 ```
+
+## usage
+presentable tag: show

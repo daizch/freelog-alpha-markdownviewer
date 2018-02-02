@@ -58,7 +58,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   loadPresentable(presentableId) {
     return window.QI.fetchResource(presentableId + '.data').then(function (res) {
-      var isError = !res.headers.get('freelog-resource-type')
+      var isError = !res.headers.get('freelog-contract-id')
       if (isError) {
         return res.json()
       } else {
@@ -140,8 +140,6 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
       var classList = target.classList
       if (classList.contains('js-to-do')) {
         errorHandler(ev)
-      } else if (classList.contains('js-btn')) {
-        markdownViewHandler(ev)
       } else if (classList.contains('js-md-title')) {
         changeMarkdownView(ev)
       }
@@ -152,22 +150,14 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     function changeMarkdownView(ev) {
       var target = ev.target;
       var index = target.dataset.index;
-      $viewer.innerHTML = self.mdContents[index]
-      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
+      setMarkdownContent(index)
       target.classList.add('selected')
     }
 
-    function markdownViewHandler(ev) {
-      var target = ev.target;
-      var index = target.dataset.index;
-      var $btn = self.getParentByClass(target, 'more-btn')
-      if ($btn.classList.contains('open')) {
-        $btn.classList.remove('open')
-        self.hideMarkdownContent(index)
-      } else {
-        $btn.classList.add('open')
-        self.showMarkdownContent(index)
-      }
+    function setMarkdownContent(index) {
+      index = index || 0
+      $viewer.innerHTML = self.mdContents[index]
+      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
     }
 
     function errorHandler(ev) {
@@ -191,6 +181,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
             }
 
             self.mdContents[index] = html
+            setMarkdownContent(index)
           })
         }
       });
