@@ -12,9 +12,9 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     self.loadData()
       .then(function (list) {
         self.responseList = list
+        self.$viewer = this.root.querySelector('.js-md-viewer')
         self.renderList(list)
         setTimeout(function () {
-          self.$viewers = shadowRoot.querySelectorAll('.js-article-item .article-content')
           self.bindEvent()
         }, 20)
       })
@@ -52,18 +52,13 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   renderTitle(presentable, index) {
     var html = `<li class="md-title js-md-title" data-index="${index}"><span>></span> ${presentable.tagInfo.resourceInfo.resourceName}</li>`
-
     return html
   }
 
   loadPresentable(presentableId) {
     return window.QI.fetchResource(presentableId + '.data').then(function (res) {
       var isError = !res.headers.get('freelog-contract-id')
-      if (isError) {
-        return res.json()
-      } else {
-        return res.text()
-      }
+      return isError ? res.json() : res.text()
     })
   }
 
@@ -85,7 +80,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var date = (new Date(presentable.createDate)).toLocaleDateString();
 
     var errInfo = App.ExceptionCode[data.errcode]
-    var html = `<div class="article-item error-item js-error-item"">
+    var html = `<div class="article-item error-item"">
                         <div class="article-title"><time datetime="${date}">${date}</time><h3>${name}</h3></div>
                         <p class="article-content"><span class="error-tip">${errInfo.desc}</span>
                          <button class="action-btn js-to-do" data-index="${index}">${errInfo.tip}</button></p>
@@ -99,7 +94,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var self = this;
     var titleHtml = ''
     var $titleWrap = this.root.querySelector('.js-md-titles')
-    var mdContents = []
+    var mdHtmlList = []
     //资源名称为title
     list.forEach(function (data, index) {
       var presentable = self.presentableList[index]
@@ -110,33 +105,23 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
         html = self.renderError(data, presentable, index)
       }
 
-      mdContents.push(html)
+      mdHtmlList.push(html)
     });
 
-    self.mdContents = mdContents
+    self.mdHtmlList = mdHtmlList
     $titleWrap.innerHTML = titleHtml
-    if (mdContents.length) {
-      this.root.querySelector('.js-md-viewer').innerHTML = mdContents[0]
+    if (mdHtmlList.length) {
+      this.root.querySelector('.js-md-viewer').innerHTML = mdHtmlList[0]
       $titleWrap.querySelector('.js-md-title').classList.add('selected')
     } else {
       this.root.querySelector('.js-md-viewer').innerHTML = '没有找到文章...'
     }
   }
 
-  getParentByClass(el, cls) {
-
-    while (!el.classList.contains(cls) && el !== document.body) {
-      el = el.parentNode
-    }
-
-    return el
-  }
-
   bindEvent() {
     var self = this;
     self.root.querySelector('.js-wrapper').addEventListener('click', function (ev) {
       var target = ev.target;
-
       var classList = target.classList
       if (classList.contains('js-to-do')) {
         errorHandler(ev)
@@ -144,8 +129,6 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
         changeMarkdownView(ev)
       }
     }, false)
-
-    var $viewer = this.root.querySelector('.js-md-viewer')
 
     function changeMarkdownView(ev) {
       var target = ev.target;
@@ -156,7 +139,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
     function setMarkdownContent(index) {
       index = index || 0
-      $viewer.innerHTML = self.mdContents[index]
+      self.$viewer.innerHTML = self.mdHtmlList[index]
       self.root.querySelector('.js-md-title.selected').classList.remove('selected')
     }
 
@@ -179,8 +162,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
             } else {
               html = self.renderError(data, presentable, index)
             }
-
-            self.mdContents[index] = html
+            self.mdHtmlList[index] = html
             setMarkdownContent(index)
           })
         }
