@@ -1,4 +1,4 @@
-<template><link rel="stylesheet" href="//static.freelog.com/web-components/static/css/reset.css"><style>.wrapper{width:100%;height:100%;padding:15px 0 15px 15px;background:#fafafa}.selected{font-weight:600}.selected span{color:#3c3}.md-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;line-height:22px}.md-titles{width:300px;position:fixed;top:0;left:0;bottom:0;overflow:auto;background:#fafafa;z-index:1;padding:10px;border-right:1px solid rgba(0,0,0,.07);border-radius:2px}.md-viewer-wrap{margin-left:300px;background:#fff;position:absolute;top:0;left:0;right:0}.md-content-viewer{max-width:800px;padding:20px 0 40px 0;margin:auto}.article-title{border-left:5px solid;margin-bottom:20px;font-size:30px;padding-left:12px;padding-bottom:9px}.article-title time{font-size:16px;color:#aaa;float:right;height:58px;line-height:58px;padding-right:40px}.article-item{border:1px solid #ddd;margin-bottom:65px}.article-content{padding:12px;overflow:auto}.error-tip{color:#e6a23c}.action-btn{display:inline-block;line-height:1;white-space:nowrap;border:1px solid #b3d8ff;text-align:center;-webkit-box-sizing:border-box;box-sizing:border-box;outline:0;padding:6px 9px;font-size:14px;border-radius:4px;color:#409eff;background:#ecf5ff;cursor:pointer}</style><div class="wrapper js-wrapper"><div class="md-titles"><ul class="js-md-titles"></ul></div><div class="md-viewer-wrap"><div class="md-content-viewer js-md-viewer"></div></div></div></template><script>/**
+<template><link rel="stylesheet" href="//static.freelog.com/web-components/static/css/reset.css"><style>.wrapper{width:100%;height:100%;padding:15px 0 15px 15px;background:#fafafa}.selected{font-weight:600;font-size:20px}.selected span{color:#3c3}.md-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;line-height:22px;-webkit-transition:all .2s;transition:all .2s}.md-titles{width:300px;position:fixed;top:0;left:0;bottom:0;overflow:auto;background:#fafafa;z-index:1;padding:10px;border-right:1px solid rgba(0,0,0,.07);border-radius:2px}.md-viewer-wrap{margin-left:300px;background:#fff;position:absolute;top:0;left:0;right:0}.md-content-viewer{max-width:800px;padding:20px 0 40px 0;margin:auto}.article-title{border-left:5px solid;margin-bottom:20px;font-size:30px;padding-left:12px;padding-bottom:9px}.article-title time{font-size:16px;color:#aaa;float:right;height:58px;line-height:58px;padding-right:40px}.article-item{border:1px solid #ddd;margin-bottom:65px}.article-content{padding:12px;overflow:auto}.error-tip{color:#e6a23c}.action-btn{display:inline-block;line-height:1;white-space:nowrap;border:1px solid #b3d8ff;text-align:center;-webkit-box-sizing:border-box;box-sizing:border-box;outline:0;padding:6px 9px;font-size:14px;border-radius:4px;color:#409eff;background:#ecf5ff;cursor:pointer}@-webkit-keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{-webkit-animation-name:fadeIn;animation-name:fadeIn;-webkit-animation-duration:1s;animation-duration:1s;-webkit-animation-fill-mode:both;animation-fill-mode:both}</style><div class="wrapper js-wrapper"><div class="md-titles"><ul class="js-md-titles"></ul></div><div class="md-viewer-wrap"><div class="md-content-viewer js-md-viewer"></div></div></div></template><script>/**
  * marked - a markdown parser
  * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
  * https://github.com/chjj/marked
@@ -17,9 +17,9 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     self.loadData()
       .then(function (list) {
         self.responseList = list
+        self.$viewer = self.root.querySelector('.js-md-viewer')
         self.renderList(list)
         setTimeout(function () {
-          self.$viewers = shadowRoot.querySelectorAll('.js-article-item .article-content')
           self.bindEvent()
         }, 20)
       })
@@ -57,18 +57,13 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   renderTitle(presentable, index) {
     var html = `<li class="md-title js-md-title" data-index="${index}"><span>></span> ${presentable.tagInfo.resourceInfo.resourceName}</li>`
-
     return html
   }
 
   loadPresentable(presentableId) {
     return window.QI.fetchResource(presentableId + '.data').then(function (res) {
       var isError = !res.headers.get('freelog-contract-id')
-      if (isError) {
-        return res.json()
-      } else {
-        return res.text()
-      }
+      return isError ? res.json() : res.text()
     })
   }
 
@@ -76,7 +71,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var name = presentable.tagInfo.resourceInfo.resourceName
     var mdHtml = marked(content);
     var date = (new Date(presentable.createDate)).toLocaleDateString()
-    var html = `<div class="article-item js-article-item" data-index="${index}" title="${name}">
+    var html = `<div class="article-item js-article-item fadeIn" data-index="${index}" title="${name}">
                         <div class="article-title"><time datetime="${date}">${date}</time><h3>${name}</h3></div>
                         <article class="article-content">${mdHtml}</article>
                     </div>`
@@ -89,8 +84,8 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var name = presentable.tagInfo.resourceInfo.resourceName
     var date = (new Date(presentable.createDate)).toLocaleDateString();
 
-    var errInfo = App.ExceptionCode[data.errcode]
-    var html = `<div class="article-item error-item js-error-item"">
+    var errInfo = App.ExceptionCode[data.errcode] || {}
+    var html = `<div class="article-item error-item fadeIn">
                         <div class="article-title"><time datetime="${date}">${date}</time><h3>${name}</h3></div>
                         <p class="article-content"><span class="error-tip">${errInfo.desc}</span>
                          <button class="action-btn js-to-do" data-index="${index}">${errInfo.tip}</button></p>
@@ -104,7 +99,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var self = this;
     var titleHtml = ''
     var $titleWrap = this.root.querySelector('.js-md-titles')
-    var mdContents = []
+    var mdHtmlList = []
     //资源名称为title
     list.forEach(function (data, index) {
       var presentable = self.presentableList[index]
@@ -115,33 +110,23 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
         html = self.renderError(data, presentable, index)
       }
 
-      mdContents.push(html)
+      mdHtmlList.push(html)
     });
 
-    self.mdContents = mdContents
+    self.mdHtmlList = mdHtmlList
     $titleWrap.innerHTML = titleHtml
-    if (mdContents.length) {
-      this.root.querySelector('.js-md-viewer').innerHTML = mdContents[0]
+    if (mdHtmlList.length) {
+      this.root.querySelector('.js-md-viewer').innerHTML = mdHtmlList[0]
       $titleWrap.querySelector('.js-md-title').classList.add('selected')
     } else {
       this.root.querySelector('.js-md-viewer').innerHTML = '没有找到文章...'
     }
   }
 
-  getParentByClass(el, cls) {
-
-    while (!el.classList.contains(cls) && el !== document.body) {
-      el = el.parentNode
-    }
-
-    return el
-  }
-
   bindEvent() {
     var self = this;
     self.root.querySelector('.js-wrapper').addEventListener('click', function (ev) {
       var target = ev.target;
-
       var classList = target.classList
       if (classList.contains('js-to-do')) {
         errorHandler(ev)
@@ -150,19 +135,17 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
       }
     }, false)
 
-    var $viewer = this.root.querySelector('.js-md-viewer')
-
     function changeMarkdownView(ev) {
       var target = ev.target;
       var index = target.dataset.index;
+      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
       setMarkdownContent(index)
       target.classList.add('selected')
     }
 
     function setMarkdownContent(index) {
       index = index || 0
-      $viewer.innerHTML = self.mdContents[index]
-      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
+      self.$viewer.innerHTML = self.mdHtmlList[index]
     }
 
     function errorHandler(ev) {
@@ -184,8 +167,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
             } else {
               html = self.renderError(data, presentable, index)
             }
-
-            self.mdContents[index] = html
+            self.mdHtmlList[index] = html
             setMarkdownContent(index)
           })
         }

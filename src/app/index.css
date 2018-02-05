@@ -7,13 +7,12 @@
 
 .selected {
   font-weight: 600;
+  font-size: 20px;
 }
 
 .selected span{
   color: #3c3;
 }
-
-
 
 .md-title {
   overflow: hidden;
@@ -21,6 +20,7 @@
   white-space: nowrap;
   cursor: pointer;
   line-height: 22px;
+  transition: all .2s;
 }
 
 .md-titles {
@@ -97,4 +97,23 @@
   color: #409eff;
   background: #ecf5ff;
   cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
 }

@@ -12,7 +12,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     self.loadData()
       .then(function (list) {
         self.responseList = list
-        self.$viewer = this.root.querySelector('.js-md-viewer')
+        self.$viewer = self.root.querySelector('.js-md-viewer')
         self.renderList(list)
         setTimeout(function () {
           self.bindEvent()
@@ -66,7 +66,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var name = presentable.tagInfo.resourceInfo.resourceName
     var mdHtml = marked(content);
     var date = (new Date(presentable.createDate)).toLocaleDateString()
-    var html = `<div class="article-item js-article-item" data-index="${index}" title="${name}">
+    var html = `<div class="article-item js-article-item fadeIn" data-index="${index}" title="${name}">
                         <div class="article-title"><time datetime="${date}">${date}</time><h3>${name}</h3></div>
                         <article class="article-content">${mdHtml}</article>
                     </div>`
@@ -79,8 +79,8 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var name = presentable.tagInfo.resourceInfo.resourceName
     var date = (new Date(presentable.createDate)).toLocaleDateString();
 
-    var errInfo = App.ExceptionCode[data.errcode]
-    var html = `<div class="article-item error-item"">
+    var errInfo = App.ExceptionCode[data.errcode] || {}
+    var html = `<div class="article-item error-item fadeIn">
                         <div class="article-title"><time datetime="${date}">${date}</time><h3>${name}</h3></div>
                         <p class="article-content"><span class="error-tip">${errInfo.desc}</span>
                          <button class="action-btn js-to-do" data-index="${index}">${errInfo.tip}</button></p>
@@ -133,6 +133,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     function changeMarkdownView(ev) {
       var target = ev.target;
       var index = target.dataset.index;
+      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
       setMarkdownContent(index)
       target.classList.add('selected')
     }
@@ -140,7 +141,6 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     function setMarkdownContent(index) {
       index = index || 0
       self.$viewer.innerHTML = self.mdHtmlList[index]
-      self.root.querySelector('.js-md-title.selected').classList.remove('selected')
     }
 
     function errorHandler(ev) {
