@@ -30,7 +30,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     }).then(function (data) {
       self.presentableList = data.data || [];
       var promises = self.presentableList.map(function (resource) {
-        return window.QI.fetchResource(resource.presentableId + '.data')
+        return window.QI.fetchPresentable(resource.presentableId + '.data')
       });
 
       return Promise.all(promises)
@@ -56,7 +56,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
   }
 
   loadPresentable(presentableId) {
-    return window.QI.fetchResource(presentableId + '.data').then(function (res) {
+    return window.QI.fetchPresentable(presentableId + '.data').then(function (res) {
       var isError = !res.headers.get('freelog-contract-id')
       return isError ? res.json() : res.text()
     })
