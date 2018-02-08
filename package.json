@@ -1,6 +1,6 @@
 {
   "name": "freelog-alpha-markdownviewer",
-  "version": "0.0.11",
+  "version": "0.0.2",
   "description": "markdown viewer component for freelog",
   "main": "index.js",
   "scripts": {
