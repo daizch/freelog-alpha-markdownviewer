@@ -25,13 +25,12 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   loadData() {
     var self = this;
-    return window.QI.fetch(`//markdowns.freelog.com/api/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=markdown&tags=show`).then(function (res) {
+    return window.QI.fetch(`/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=markdown&tags=show`).then(function (res) {
       return res.json()
     }).then(function (data) {
       self.presentableList = data.data || [];
       var promises = self.presentableList.map(function (resource) {
-        var target = resource.presentableId + '.data';
-        return window.QI.fetch(`//markdowns.freelog.com/api/v1/presentables/resource/${target}?nodeId=${window.__auth_info__.__auth_node_id__}`)
+        return window.QI.fetchPresentableData(resource.presentableId)
       });
 
       return Promise.all(promises)
@@ -39,7 +38,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
       var result = []
 
       values.forEach(function (res) {
-        var isError = false// !res.headers.get('freelog-resource-type')
+        var isError = !res.headers.get('freelog-resource-type')
         if (isError) {
           result.push(res.json())
         } else {

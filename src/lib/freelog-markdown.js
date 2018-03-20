@@ -9,9 +9,11 @@
     if (errInfo) {
       return `<div class="article-content"><span class="error-tip">该图片${errInfo.desc}</span>
                          <button class="action-btn js-auth-image">${errInfo.tip}</button></div>`
-    } else {
+    } else if (data && data.msg) {
       return `<div class="article-content"><span class="error-tip">该图片${data.msg}</span>
                          <button class="action-btn">授权错误码：${data.data.authCode}</button></div>`
+    } else {
+      return '<div class="article-content"><span class="error-tip">图片加载出错</span></div>'
     }
   }
 
@@ -62,7 +64,14 @@
         } else {
           return res.blob().then(function (imgBlob) {
             done(function ($img) {
-              $img.src = URL.createObjectURL(imgBlob);
+              var src = URL.createObjectURL(imgBlob);
+              if ($img.nodeName !== 'IMG') {
+                var $image = document.createElement('img')
+                $image.src = src
+                $img.replaceWith($image)
+              } else {
+                $img.src = src;
+              }
             })
           })
         }
@@ -71,16 +80,21 @@
       })
   }
 
-  var __markdown_index = 0
   var renderHandles = {}
   var renderer = new marked.Renderer();
   var oldImage = renderer.image
   // Override function
+
+  window.loadFreelogMarkdownImageHandler = function ($img) {
+    if (renderHandles[$img.id]) {
+      renderHandles[$img.id]()
+      delete renderHandles[$img.id]
+    }
+  }
   renderer.image = function (href, title, text) {
     var freelogSrcReg = /w+\.freelog\.com/gi;
     var presentableIdReg = /resource\/(.+)\.data/
     var presentableId
-    var markdownIndex = this.options.__markdown_index
     var container = this.options.container
 
     if (text === 'freelog-resource') {
@@ -90,7 +104,7 @@
     }
 
     if (presentableId) {
-      var out = '<img alt="' + text + '"';
+      var out = '<img src="//visuals.oss-cn-shenzhen.aliyuncs.com/loading.gif" onload="loadFreelogMarkdownImageHandler(this)" alt="' + text + '"';
       var domId = `md-img-${presentableId}`
       out += ` id="${domId}"`
       if (title) {
@@ -103,17 +117,12 @@
         if ($img) {
           fn($img)
         } else {
-          renderHandles[markdownIndex] = renderHandles[markdownIndex] || [];
-          renderHandles[markdownIndex].push(function renderImage() {
+          renderHandles[domId] = function renderImage() {
             $img = container.querySelector(`#${domId}`);
             if ($img) {
               fn($img)
-            } else {
-              setTimeout(function () {
-                renderImage()
-              }, 100)
             }
-          })
+          };
         }
       })
       return out;
@@ -122,24 +131,6 @@
     }
   };
 
-  function doneFn(index) {
-    __markdown_index++;
-    return function (err, out) {
-      if (err) return
-      setTimeout(function () {
-        var handles = renderHandles[index]
-        var h;
-        if (handles) {
-          while (h = handles.shift()) {
-            h()
-          }
-          delete renderHandles[index]
-        }
-      }, 10)
-      return out
-    }
-  }
-
   function freelogMarkdownParse(content, opts) {
     opts = opts || {}
     opts = Object.assign({
@@ -147,11 +138,10 @@
       breaks: true,
       tables: true,
       container: document.body,
-      __markdown_index: __markdown_index,
       renderer: renderer
     }, opts);
 
-    return marked(content, opts, doneFn(__markdown_index));
+    return marked(content, opts);
   }
 
   if (typeof module !== 'undefined' && typeof exports === 'object') {
