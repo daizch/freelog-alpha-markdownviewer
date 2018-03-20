@@ -17,3 +17,6 @@ npm run build
 
 ## usage
 presentable tag: show
+
+
+使用freelog图片：![freelog-resource](presentableId)
