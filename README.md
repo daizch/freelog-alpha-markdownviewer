@@ -19,4 +19,7 @@ npm run build
 presentable tag: show
 
 
-使用freelog图片：![freelog-resource](presentableId)
+使用freelog图片：
+```markdown
+![freelog-resource](presentableId)
+```
