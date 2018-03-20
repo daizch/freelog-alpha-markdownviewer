@@ -5,9 +5,14 @@
 
   function renderImageError(data) {
     var App = window.FreeLogApp
-    var errInfo = App.ExceptionCode[data.errcode] || {}
-    return `<p class="article-content"><span class="error-tip">该图片${errInfo.desc}</span>
-                         <button class="action-btn js-auth-image">${errInfo.tip}</button></p>`
+    var errInfo = App.ExceptionCode[data.errcode]
+    if (errInfo) {
+      return `<div class="article-content"><span class="error-tip">该图片${errInfo.desc}</span>
+                         <button class="action-btn js-auth-image">${errInfo.tip}</button></div>`
+    } else {
+      return `<div class="article-content"><span class="error-tip">该图片${data.msg}</span>
+                         <button class="action-btn">授权错误码：${data.data.authCode}</button></div>`
+    }
   }
 
   function bindEvent(container) {
@@ -30,7 +35,7 @@
       callback: function (presentable) {
         var contractDetail = presentable && presentable.contractDetail;
         if (!data.data.contract || (contractDetail && contractDetail.fsmState !== data.data.contract.fsmState)) {
-          loadFreelogImage(target._imageLink, function (fn) {
+          loadFreelogImage(target._presentableId, function (fn) {
             fn(target)
           })
         }
@@ -38,8 +43,8 @@
     });
   }
 
-  function loadFreelogImage(href, done) {
-    return window.QI.fetch(href)
+  function loadFreelogImage(presentableId, done) {
+    return window.QI.fetchPresentableData(presentableId)
       .then((res) => {
         //fetch image fail
         if (!res.headers.get('freelog-contract-id')) {
@@ -49,7 +54,7 @@
               var $frag = document.createElement('div')
               $frag.innerHTML = html
               $frag._authData = data
-              $frag._imageLink = href
+              $frag._presentableId = presentableId
               $img.replaceWith($frag)
               bindEvent($frag)
             })
@@ -74,15 +79,17 @@
   renderer.image = function (href, title, text) {
     var freelogSrcReg = /w+\.freelog\.com/gi;
     var presentableIdReg = /resource\/(.+)\.data/
-    var isFreelogResource = (text === 'freelog-resource' || freelogSrcReg.test(href))
     var presentableId
     var markdownIndex = this.options.__markdown_index
     var container = this.options.container
 
-    if (presentableIdReg.test(href)) {
+    if (text === 'freelog-resource') {
+      presentableId = presentableIdReg.test(href) ? presentableIdReg.exec(href)[1] : href
+    } else if (freelogSrcReg.test(href) && presentableIdReg.test(href)) {
       presentableId = presentableIdReg.exec(href)[1]
     }
-    if (isFreelogResource && presentableId) {
+
+    if (presentableId) {
       var out = '<img alt="' + text + '"';
       var domId = `md-img-${presentableId}`
       out += ` id="${domId}"`
@@ -91,7 +98,7 @@
       }
       out += this.options.xhtml ? '/>' : '>';
 
-      loadFreelogImage(href, function (fn) {
+      loadFreelogImage(presentableId, function (fn) {
         var $img = container.querySelector(`#${domId}`);
         if ($img) {
           fn($img)

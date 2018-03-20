@@ -65,16 +65,6 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   renderMarkdown(content, presentable, index) {
     var name = presentable.name
-    var img = `https://tutorial.freelog.com/api/v1/presentables/resource/5aaf75d346a59b0053a0546b.data?nodeId=${window.__auth_info__.__auth_node_id__}`
-    content = `# test image
-![freelog-resource](${img})
-
-![freelog-resource](https://tutorial.freelog.com/api/v1/presentables/resource/5aaf792946a59b0053a0546d.data?nodeId=${window.__auth_info__.__auth_node_id__})
-
-  ![](http://visuals.oss-cn-shenzhen.aliyuncs.com/login%20page.png)
-
-    `
-
     var mdHtml = window.freelogMarkdownParse(content, {
       container: this.root
     })
