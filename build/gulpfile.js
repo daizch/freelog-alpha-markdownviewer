@@ -11,6 +11,7 @@ const gulpif = require('gulp-if');
 const rename = require("gulp-rename");
 const path = require('path')
 const filter = require('gulp-filter');
+const livereload = require('gulp-livereload');
 const chalk = require('chalk')
 const dirname = path.dirname(__filename)
 const dest = path.join(dirname, '../dist')
@@ -59,6 +60,7 @@ gulp.task('compile', function () {
     })))
     .pipe(htmlFilter)
     .pipe(gulp.dest(dest))
+    .pipe(livereload())
     .on('finish', function () {
       !isBuild && console.log(chalk.green('Compiled successfully'))
     });
@@ -75,6 +77,7 @@ gulp.task('default', ['build'])
 
 gulp.task('watch', function () {
   isBuild = false
+  livereload.listen();
   gulp.watch(`${src}/**/*`, ['compile'])
   console.log(chalk.magenta('start watching...'))
 })
