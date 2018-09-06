@@ -120,9 +120,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
     var $titleWrap = this.root.querySelector('.js-md-titles')
     var mdHtmlList = []
     //资源名称为title
-    console.log(list)
     list.forEach(function (presentable, index) {
-      console.log(presentable)
       presentable.index = index
       titleHtml += self.renderTitle(presentable)
     });
