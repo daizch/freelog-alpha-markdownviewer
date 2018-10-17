@@ -1,6 +1,6 @@
 import './index.less'
 
-var MarkdownParser = require('../lib/markdown-parser')
+// var MarkdownParser = require('../lib/markdown-parser')
 var htmlStr = require('./index.html')
 
 class FreelogAlphaMarkdownviewer extends HTMLElement {
@@ -32,12 +32,11 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
   }
 
   loadData() {
-    var self = this;
     return window.FreelogApp.QI.fetch(`/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=markdown&tags=show`).then(function (res) {
       return res.json()
     }).then(function (data) {
-      self.presentableList = data.data || [];
-      var promises = self.presentableList.map(function (resource) {
+      var presentableList = data.data || [];
+      var promises = presentableList.map(function (resource) {
         return window.FreelogApp.QI.fetchPresentableResourceData(resource.presentableId).then(function (res) {
           return {
             response: res,
@@ -84,13 +83,14 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
   }
 
   renderMarkdown(presentable) {
-    var name = presentable.detail.presentableName
-    this.$viewer.innerHTML = ''
-
-    var markdownParser = new MarkdownParser({
-      container: this.$viewer
-    });
-    markdownParser.render(presentable.text)
+    window.FreelogApp.QI.requireSubResource('9f5bad8c9633eb208d2ce35d6c78f4f60c154392')
+      .then(()=>{
+        this.$viewer.innerHTML = ''
+        var markdownParser = new window.MarkdownParser({
+          container: this.$viewer
+        });
+        markdownParser.render(presentable.text)
+      })
   }
 
   reanderHead(presentable) {
@@ -103,7 +103,7 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
 
   renderError(presentable) {
     var App = window.FreelogApp
-    var errInfo = App.getErrorInfo(presentable.json)
+    var errInfo = App.getErrorInfo(presentable.json || presentable)
     var html = `<span class="error-tip">${errInfo.desc}</span>
                          <button class="action-btn js-to-do" data-index="${presentable.index}">${errInfo.tip}</button>`
 
@@ -111,11 +111,9 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
   }
 
   renderList(list) {
-    var html = '';
     var self = this;
     var titleHtml = ''
     var $titleWrap = this.root.querySelector('.js-md-titles')
-    var mdHtmlList = []
     //资源名称为title
     list.forEach(function (presentable, index) {
       presentable.index = index
@@ -166,28 +164,22 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
       self.renderContent(presentable)
     }
 
-    function setMarkdownContent(html) {
-      self.$viewer.innerHTML = html
-    }
-
     function errorHandler(ev) {
       var target = ev.target;
       var index = target.dataset.index;
       var data = self.responseList[index]
       window.FreelogApp.trigger('HANDLE_INVALID_RESPONSE',{
         response: data.json,
-        callback:function (presentable) {
-          self.loadPresentable(presentable.presentableId).then(function (data) {
-            self.responseList.splice(index, 1, data)
-            var html
-            var presentable = self.presentableList[index]
+        callback:function () {
+          self.loadPresentable(data.detail.presentableId).then(function (data) {
+            var presentable = self.responseList[index]
             if (typeof data === 'string') {
-              html = self.renderMarkdown(data, presentable, index)
+              presentable.text = data
+              self.renderMarkdown(presentable)
             } else {
-              html = self.renderError(data, presentable, index)
+              presentable.json = data
+              self.renderError(presentable)
             }
-            self.mdHtmlList[index] = html
-            setMarkdownContent(index)
           })
         }
       })

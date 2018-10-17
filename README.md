@@ -16,9 +16,17 @@ npm run build
 ```
 
 ## usage
-presentable tag: show
+使用freelog多媒体资源（图片，视频，meme）
 
-使用freelog图片：
+* type: md
+* tags: show
+
+### 直接使用节点资源
 ```markdown
 ![freelog-resource](presentableId)
+```
+
+### 直接使用子资源
+```markdown
+![freelog-resource](resourceId)
 ```

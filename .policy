@@ -1,3 +1,4 @@
 for public:
-    in <init>:
-        terminate
+initial:
+active
+terminate
