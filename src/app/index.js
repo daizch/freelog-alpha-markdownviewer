@@ -2,6 +2,7 @@ import './index.less'
 
 // var MarkdownParser = require('../lib/markdown-parser')
 var htmlStr = require('./index.html')
+var dependencies = require('../../package.json').freelogConfig.dependencies
 
 class FreelogAlphaMarkdownviewer extends HTMLElement {
   constructor() {
@@ -32,10 +33,10 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
   }
 
   loadData() {
-    return window.FreelogApp.QI.fetch(`/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=markdown&tags=show`).then(function (res) {
+    return window.FreelogApp.QI.fetch(`/v1/presentables?nodeId=${window.__auth_info__.__auth_node_id__}&resourceType=markdown`).then(function (res) {
       return res.json()
-    }).then(function (data) {
-      var presentableList = data.data || [];
+    }).then(function (res) {
+      var presentableList = res.data.dataList || [];
       var promises = presentableList.map(function (resource) {
         return window.FreelogApp.QI.fetchPresentableResourceData(resource.presentableId).then(function (res) {
           return {
@@ -83,11 +84,21 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
   }
 
   renderMarkdown(presentable) {
-    window.FreelogApp.QI.requireSubResource('9f5bad8c9633eb208d2ce35d6c78f4f60c154392')
-      .then(()=>{
+    window.FreelogApp.QI.requireSubResource(dependencies['markdown-parser'])
+      .then(() => {
         this.$viewer.innerHTML = ''
         var markdownParser = new window.MarkdownParser({
-          container: this.$viewer
+          container: this.$viewer,
+          renderImageError($el, data) {
+            $el.src = ''
+            //todo
+            if (typeof data === 'string') {
+              $el.src = ''
+            } else {
+
+            }
+            console.log('renderImageError', arguments)
+          }
         });
         markdownParser.render(presentable.text)
       })
@@ -168,9 +179,9 @@ class FreelogAlphaMarkdownviewer extends HTMLElement {
       var target = ev.target;
       var index = target.dataset.index;
       var data = self.responseList[index]
-      window.FreelogApp.trigger('HANDLE_INVALID_RESPONSE',{
+      window.FreelogApp.trigger('HANDLE_INVALID_RESPONSE', {
         response: data.json,
-        callback:function () {
+        callback: function () {
           self.loadPresentable(data.detail.presentableId).then(function (data) {
             var presentable = self.responseList[index]
             if (typeof data === 'string') {

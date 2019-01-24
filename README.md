@@ -18,8 +18,7 @@ npm run build
 ## usage
 使用freelog多媒体资源（图片，视频，meme）
 
-* type: md
-* tags: show
+* 资源类型: markdown
 
 ### 直接使用节点资源
 ```markdown

@@ -2,16 +2,7 @@
   .wrapper {
     padding: 15px 0 15px 15px;
     background: white;
-  }
-
-  .selected {
-    font-weight: 600;
-    font-size: 18px;
-    color: #007bff;
-  }
-
-  .selected span{
-    color: #007bff;
+    min-height: 100vh;
   }
 
   .md-title {
@@ -22,11 +13,20 @@
     line-height: 22px;
     transition: all .2s;
     padding: 2px;
+    font-size: 14px;
+    &.selected {
+      font-weight: 600;
+      font-size: 16px;
+      color: #007bff;
+      background-color: #eee;
+      span{
+        color: #007bff;
+      }
+    }
   }
 
   .md-title:hover {
     background-color: #ddd;
-
   }
 
   .md-titles {
@@ -45,8 +45,8 @@
 
   .md-viewer-wrap {
     background: #fff;
-    margin-left: 350px;
-    margin-right: 280px;
+    margin-left: 330px;
+    margin-right: 300px;
     overflow: auto;
   }
 

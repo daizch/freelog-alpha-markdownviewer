@@ -14,7 +14,10 @@
   "license": "MIT",
   "freelogConfig": {
     "type": "widget",
-    "meta": {}
+    "meta": {},
+    "dependencies": {
+      "markdown-parser": "dde4ef349881285fb545b038e471e0c519e4c200"
+    }
   },
   "devDependencies": {
     "@freelog/freelog-dev-server": "^0.0.10",
@@ -43,6 +46,7 @@
     "rimraf": "^2.6.2",
     "run-sequence": "^2.2.1",
     "style-loader": "^0.23.0",
+    "terser-webpack-plugin": "^1.2.0",
     "url-loader": "^1.0.1",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
