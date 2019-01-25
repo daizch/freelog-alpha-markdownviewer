@@ -4,23 +4,22 @@
   "description": "A freelog widget",
   "main": "index.js",
   "scripts": {
-    "dev": "node build/dev-server.js",
-    "start": "node build/dev-server.js",
-    "build": "node build/build.js",
-    "publish": "freelog-cli publish beta -f ./dist/freelog-alpha-markdownviewer.js"
+    "dev": "node build/dev-server.js --title=freelog-alpha-markdownviewer",
+    "start": "npm run dev",
+    "build": "node build/build.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "zechengdai",
   "license": "MIT",
   "freelogConfig": {
     "type": "widget",
     "meta": {},
     "dependencies": {
-      "markdown-parser": "dde4ef349881285fb545b038e471e0c519e4c200"
+      "markdown-parser": "d2327dc8d7916907ec27a7accf1be4d84d7c32c1"
     }
   },
   "devDependencies": {
-    "@freelog/freelog-dev-server": "^0.0.10",
+    "@freelog/freelog-dev-server": "^0.0.13",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.5",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -45,9 +44,10 @@
     "postcss-loader": "^2.1.5",
     "rimraf": "^2.6.2",
     "run-sequence": "^2.2.1",
-    "style-loader": "^0.23.0",
-    "terser-webpack-plugin": "^1.2.0",
     "url-loader": "^1.0.1",
+    "vue-loader": "^15.2.4",
+    "vue-style-loader": "^4.1.0",
+    "vue-template-compiler": "^2.5.16",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
     "webpack-merge": "^4.1.3",
@@ -55,5 +55,9 @@
   },
   "engines": {
     "node": ">= 6.0.0"
+  },
+  "dependencies": {
+    "vue": "^2.5.16",
+    "vue-router": "^3.0.1"
   }
 }

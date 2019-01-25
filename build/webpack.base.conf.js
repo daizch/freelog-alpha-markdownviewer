@@ -1,7 +1,60 @@
 var path = require('path')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 var ExtractTextPlugin = require("extract-text-webpack-plugin")
 const pkg = require(path.join(__dirname, '../package.json'))
 const config = require('../config')
+var cssLoaders = function (options) {
+  options = options || {}
+  const cssLoader = {
+    loader: 'css-loader',
+    options: {
+      sourceMap: options.sourceMap
+    }
+  }
+
+  const postcssLoader = {
+    loader: 'postcss-loader',
+    options: {
+      sourceMap: options.sourceMap
+    }
+  }
+
+  // generate loader string to be used with extract text plugin
+  function generateLoaders(loader, loaderOptions) {
+    const loaders = options.usePostCSS ? [cssLoader, postcssLoader] : [cssLoader]
+
+    if (loader) {
+      loaders.push({
+        loader: loader + '-loader',
+        options: Object.assign({}, loaderOptions, {
+          sourceMap: options.sourceMap
+        })
+      })
+    }
+
+    // Extract CSS when that option is specified
+    // (which is the case during production build)
+    if (options.extract) {
+      return ExtractTextPlugin.extract({
+        use: loaders,
+        fallback: 'vue-style-loader'
+      })
+    } else {
+      return ['vue-style-loader'].concat(loaders)
+    }
+  }
+
+  // https://vue-loader.vuejs.org/en/configurations/extract-css.html
+  return {
+    css: generateLoaders(),
+    postcss: generateLoaders(),
+    less: generateLoaders('less'),
+    sass: generateLoaders('sass', {indentedSyntax: true}),
+    scss: generateLoaders('sass'),
+    stylus: generateLoaders('stylus'),
+    styl: generateLoaders('stylus')
+  }
+}
 
 module.exports = {
   entry: {
@@ -16,17 +69,33 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'style-loader',
+          'vue-style-loader',
           'css-loader'
         ],
       },
       {
-        test: /\.less$/,
+        test: /\.less/,
         use: [
-          'style-loader',
+          'vue-style-loader',
           'css-loader',
           'less-loader'
         ],
+      },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          loaders: cssLoaders({
+            usePostCSS: true
+          }),
+          transformToRequire: {
+            video: 'src',
+            source: 'src',
+            img: 'src',
+            image: 'xlink:href'
+          }
+          // other vue-loader options go here
+        }
       },
       {
         test: /\.js$/,
@@ -53,8 +122,12 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.json']
+    extensions: ['.js', '.vue', '.json'],
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js'
+    }
   },
   plugins: [
+    new VueLoaderPlugin(),
   ]
 }

@@ -1,6 +1,7 @@
 var webpack = require('webpack')
 var merge = require('webpack-merge')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+
 const baseConfig = require('./webpack.base.conf')
 
 module.exports = merge(baseConfig, {
@@ -13,7 +14,6 @@ module.exports = merge(baseConfig, {
     concatenateModules: true,
     nodeEnv: 'production',
     minimizer: [
-      // new TerserPlugin()
       new UglifyJsPlugin({
         uglifyOptions: {
           compress: {
