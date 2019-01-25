@@ -1,6 +1,6 @@
 {
   "name": "freelog-alpha-markdownviewer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A freelog widget",
   "main": "index.js",
   "scripts": {
